@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+
+    <!--@{}就是/bookstore-->
+    <base th:href="@{/}">
+    <title>尚硅谷会员注册页面</title>
+    <link type="text/css" rel="stylesheet" href="static/css/style.css"/>
+    <link rel="stylesheet" href="static/css/register.css"/>
+    <style type="text/css">
+        .login_form {
+            height: 420px;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="login_header">
+        <a href="index.html">
+            <img class="logo_img" alt="" src="static/img/logo.gif"/>
+        </a>
+    </div>
+
+    <div class="login_banner">
+        <div class="register_form">
+            <h1>注册尚硅谷会员</h1>
+            <form action="user" @submit="checkInfo()" method="post">
+                <input type="hidden" name="method" value="regist">
+                <div class="form-item">
+                    <div>
+                        <label>用户名称:</label>
+                        <input name="userName" type="text" placeholder="请输入用户名" @change="checkUsername()"
+                               v-model="username"/>
+                    </div>
+                    <span class="errMess" v-text="usernameErrorMsg">用户名应为6~16位数组和字母组成</span>
+                </div>
+                <div class="form-item">
+                    <div>
+                        <label>用户密码:</label>
+                        <input name="userPwd" type="password" placeholder="请输入密码" @change="checkPassword()"
+                               v-model="password"/>
+                    </div>
+                    <span class="errMess" v-text="passwordErrorMsg">密码的长度至少为6位</span>
+                </div>
+                <div class="form-item">
+                    <div>
+                        <label>确认密码:</label>
+                        <input type="password" placeholder="请输入确认密码" @change="checkRePassword()" v-model="repassword"/>
+                    </div>
+                    <span class="errMess" v-text="repasswordErrorMsg">密码两次输入不一致!</span>
+                </div>
+                <div class="form-item">
+                    <div>
+                        <label>用户邮箱:</label>
+                        <input name="email" type="text" placeholder="请输入邮箱" @change="checkEmail()" v-model="email"/>
+                    </div>
+                    <span class="errMess" v-text="emailErrorMsg">请输入正确的邮箱格式!</span>
+                </div>
+                <div class="form-item">
+                    <div>
+                        <label>验证码:</label>
+                        <div class="verify">
+                            <input name="code" type="text" placeholder="" @change="checkCode()" v-model="code"/>
+                            <img id="code" @click="refreshImg()" th:src="@{/kaptcha}" alt=""
+                                 style="width: 110px;height: 40px;margin-left: 5px"/>
+                        </div>
+                    </div>
+                    <span class="errMess" v-text="codeErrorMsg">请输入正确的验证码!</span>
+                </div>
+                <button class="btn">注册</button>
+            </form>
+        </div>
+    </div>
+    <div id="bottom">
+      <span>
+        尚硅谷书城.Copyright &copy;2015
+      </span>
+    </div>
+</div>
+
+</body>
+<script src="static/script/vue.js"></script>
+<script>
+    var vue = new Vue({
+        el: "#app",
+        data: {
+            username: "",
+            password: "",
+            repassword: "",
+            email: "",
+            code: "",
+            usernameErrorMsg: "[[${usernameErrorMsg}]]",
+            passwordErrorMsg: "",
+            repasswordErrorMsg: "",
+            emailErrorMsg: "",
+            codeErrorMsg: "[[${codeErrorMsg}]]"
+        },
+        methods: {
+
+
+            /**
+             *
+             * 使用指定reg校验指定content
+             * @param reg : 正则表达式
+             * @param content : 内容
+             * @return : 满足正则表达式返回true, 否则返回false
+             */
+            checkReg(reg, content) {
+                if (reg.test(content)) {
+                    //账户合法, 清空错误提示
+                    return true;
+                } else {
+                    //账户不合法 , 给出错误提示
+                    return false;
+                }
+            },
+
+            /**
+             * 校验username
+             * @return : 账户合法返回true,账户不合法返回false
+             */
+            checkUsername() {
+
+                var flag = this.checkReg(/^[0-9a-zA-Z]{6,16}$/, this.username);
+                this.usernameErrorMsg = flag ? "" : "用户名应为6~16位数组和字母组成!";
+                return flag;
+            },
+
+            /**
+             * 校验password
+             * @return : 密码合法返回true,否则返回false
+             */
+            checkPassword() {
+
+                var flag = this.checkReg(/^.{6,}$/, this.password);
+                this.passwordErrorMsg = flag ? "" : "密码的长度至少为6位!";
+                return flag;
+            },
+
+            /**
+             * 校验repassword
+             * @return : 两次密码一致返回true,否则返回false
+             */
+            checkRePassword() {
+                if (this.repassword == this.password) {
+                    //两次密码一致,清空错误提示
+                    this.repasswordErrorMsg = "";
+
+                    return true;
+                } else {
+                    //两次密码不一致, 给出错误提示
+                    this.repasswordErrorMsg = "密码两次输入不一致!";
+                    return false;
+                }
+
+            },
+
+
+            /**
+             * 校验email
+             * @return : 邮箱合法返回true,否则返回false
+             */
+            checkEmail() {
+                var flag = this.checkReg(/^[a-zA-Z0-9_\.-]+@([a-zA-Z0-9-]+[\.]{1})+[a-zA-Z]+$/, this.email);
+                this.emailErrorMsg = flag ? "" : "请输入正确的邮箱格式!";
+                return flag;
+            },
+
+            /**
+             * 校验code
+             * @return : 验证码合法返回true,否则返回false
+             */
+            checkCode() {
+
+                var flag = this.checkReg(/^[0-9a-z]{5}$/, this.code);
+                this.codeErrorMsg = flag ? "" : "请输入正确的验证码!";
+                return flag;
+
+            },
+
+            checkInfo() {
+                if (!this.checkUsername() || !this.checkPassword() || !this.checkRePassword() || !this.checkEmail() || !this.checkCode()) {
+                    //当 账户不合法 或 密码不合法 或 确认密码不合法 或 邮箱不合法 或 验证码不合法 , 就禁止表单提交
+                    event.preventDefault();
+                    return;
+                }
+            },
+
+            /**
+             * 刷新图片验证码
+             */
+            refreshImg() {
+                console.log("刷新图片验证码!!!");
+                //让img组件重新请求KatpchaServlet : 设置src属性
+                var imgEle = document.getElementById("code");
+                //路径一样, 返回的是图片 , 就会使用缓存.
+                imgEle.setAttribute("src", "kaptcha?" + new Date());
+
+            }
+        }
+    });
+
+</script>
+</html>

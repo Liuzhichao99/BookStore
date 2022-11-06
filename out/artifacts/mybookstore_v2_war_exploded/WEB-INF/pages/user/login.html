@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <base th:href="@{/}">
+    <title>尚硅谷会员登录页面</title>
+    <link type="text/css" rel="stylesheet" href="static/css/style.css"/>
+</head>
+<body>
+<div id="app">
+
+    <div id="login_header">
+        <a href="index.html">
+            <img class="logo_img" alt="" src="static/img/logo.gif"/>
+        </a>
+    </div>
+
+    <div class="login_banner">
+        <div id="l_content">
+            <span class="login_word">欢迎登录</span>
+        </div>
+
+        <div id="content">
+            <div class="login_form">
+                <div class="login_box">
+                    <div class="tit">
+                        <h1>尚硅谷会员</h1>
+                    </div>
+                    <div class="msg_cont">
+                        <b></b>
+                        <span class="errorMsg" v-text="errorMsg" style="color: red" >请输入用户名和密码</span>
+                    </div>
+                    <div class="form">
+                        <!--登录表单-->
+                        <form action="user" @submit="checkInfo()" method="post">
+                            <!--这是一个隐藏的form表单项,用于在表单发起时,提交一个参数:method=login-->
+                            <input type="hidden" name="method" value="login">
+                            <label>用户名称：</label>
+                            <input
+                                    class="itxt"
+                                    type="text"
+                                    placeholder="请输入用户名"
+                                    autocomplete="off"
+                                    tabindex="1"
+                                    name="username"
+                                    id="username"
+                                    @change="checkUsername()"
+                                    v-model="username"
+                            />
+                            <br/>
+                            <br/>
+                            <label>用户密码：</label>
+                            <input
+                                    class="itxt"
+                                    type="password"
+                                    placeholder="请输入密码"
+                                    autocomplete="off"
+                                    tabindex="1"
+                                    name="password"
+                                    id="password"
+                                    @change="checkPassword()"
+                                    v-model="password"
+                            />
+                            <br/>
+                            <br/>
+                            <input type="submit" value="登录" id="sub_btn"/>
+                        </form>
+                        <div class="tit">
+                            <a th:href="@{/user(method=toRegistPage)}">立即注册</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="bottom">
+      <span>
+        尚硅谷书城.Copyright &copy;2015
+      </span>
+    </div>
+</div>
+
+</body>
+<script src="static/script/vue.js"></script>
+<script>
+    var vue = new Vue({
+        el: "#app",
+        data: {
+            username: "",
+            password: "",
+            errorMsg: "[[${errorMsg}]]"
+        },
+        methods: {
+
+
+            /**
+             * 检验指定内容为空
+             * @param content : 检验的内容
+             * @param errorMsg : 错误提示信息
+             * @return : 为空返回false, 不为空返回true
+             */
+            isNull(content, errorMsg) {
+                var reg = /^\s*$/;
+                if (reg.test(content)) {
+                    //username为空 , 错误提示
+                    this.errorMsg = errorMsg;
+                    return false;
+                } else {
+                    //username不为空 , 清空错误提示
+                    this.errorMsg = "";
+                    return true;
+                }
+            },
+
+            /**
+             * 检查username
+             */
+            checkUsername() {
+                console.log("checkUsername");
+                return this.isNull(this.username, "账户不能为空!");
+            },
+
+            /**
+             * 检查password
+             */
+            checkPassword() {
+                console.log("checkPassword");
+                return this.isNull(this.password, "密码不能为空!");
+            },
+
+            /**
+             * 监听表单提交,并检查表单信息(username,password)
+             */
+            checkInfo() {
+                if (!this.checkUsername() || !this.checkPassword()) {
+                    //当 账户不合法(false) 或 密码不合法(false)  , 就禁止表单提交
+                    event.preventDefault();
+                    return;
+                }
+                console.log("表单合法就提交....");
+            }
+        }
+    })
+
+</script>
+</html>
